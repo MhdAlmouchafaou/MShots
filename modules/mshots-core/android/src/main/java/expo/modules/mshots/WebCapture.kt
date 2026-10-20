@@ -125,7 +125,7 @@ object WebCapture {
     } catch (_: Throwable) {}
     if (o.dark) {
       try {
-        if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) WebSettingsCompat.setAlgorithmicDarkening(web.settings, true)
+        if (Build.VERSION.SDK_INT >= 33) web.settings.isAlgorithmicDarkeningAllowed = true
         @Suppress("DEPRECATION")
         if (Build.VERSION.SDK_INT < 33 && WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) WebSettingsCompat.setForceDark(web.settings, WebSettingsCompat.FORCE_DARK_ON)
       } catch (_: Throwable) {}
