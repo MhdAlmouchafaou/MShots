@@ -544,7 +544,7 @@ export const DEVICES: DeviceSpec[] = [
     depth: 12,
     px: { w: 422, h: 514 },
     finishes: [F('natural', 'Titane naturel', '#BEB9AF', '#D6D2C8', '#F1EDE5'), F('black', 'Titane noir', '#2C2C2E', '#38383B', '#6A6A6E')],
-    base: { style: 'crown-strap', h: 46, w: 0.92, color: '#E46B2E' },
+    base: { style: 'crown-strap', h: 28, w: 0.92, color: '#E46B2E' },
     tags: ['apple', 'watch'],
   },
   {
@@ -562,7 +562,7 @@ export const DEVICES: DeviceSpec[] = [
     depth: 9.7,
     px: { w: 416, h: 496 },
     finishes: [F('jet', 'Noir de jais', '#1E1E20', '#28282A', '#5A5A5E'), F('silver', 'Argent', '#D7D9DC', '#E5E7E9', '#FFFFFF'), F('rose', 'Or rose', '#E2BFB2', '#ECCFC4', '#FAEAE4')],
-    base: { style: 'strap', h: 46, w: 0.82, color: '#2B2B2E' },
+    base: { style: 'strap', h: 28, w: 0.82, color: '#2B2B2E' },
     tags: ['apple', 'watch'],
   },
   {
@@ -581,7 +581,7 @@ export const DEVICES: DeviceSpec[] = [
     px: { w: 480, h: 480 },
     finishes: [ANDROID[0], ANDROID[1], ANDROID[5]],
     round: true,
-    base: { style: 'strap', h: 44, w: 0.5, color: '#202022' },
+    base: { style: 'strap', h: 27, w: 0.5, color: '#202022' },
     tags: ['android', 'watch'],
   },
   // --- browser windows (no hardware: perfect for websites)
@@ -836,7 +836,7 @@ DEVICES.push(
     depth: 10.7,
     px: { w: 324, h: 394 },
     finishes: [F('midnight', 'Minuit', '#2E3642', '#36404D', '#5A6676'), F('starlight', 'Lumière stellaire', '#E3DCCF', '#ECE6DA', '#FBF7EF'), MAC[1]],
-    base: { style: 'strap', h: 40, w: 0.8, color: '#C9C2B4' },
+    base: { style: 'strap', h: 24, w: 0.8, color: '#C9C2B4' },
     tags: ['apple', 'watch'],
   },
   {
@@ -854,7 +854,7 @@ DEVICES.push(
     px: { w: 480, h: 480 },
     finishes: [ANDROID[5], F('white', 'Titane blanc', '#D9D8D4', '#E5E4E0', '#FFFFFF')],
     round: true,
-    base: { style: 'crown-strap', h: 44, w: 0.56, color: '#F06A2A' },
+    base: { style: 'crown-strap', h: 27, w: 0.56, color: '#F06A2A' },
     tags: ['android', 'watch'],
   },
   {
@@ -872,7 +872,7 @@ DEVICES.push(
     px: { w: 456, h: 456 },
     finishes: [MAC[1], ANDROID[0], F('gold', 'Or', '#D8BE93', '#E5CFA9', '#FBEDD6')],
     round: true,
-    base: { style: 'strap', h: 42, w: 0.6, color: '#3B3F48' },
+    base: { style: 'strap', h: 26, w: 0.6, color: '#3B3F48' },
     tags: ['android', 'watch'],
   },
   // browsers

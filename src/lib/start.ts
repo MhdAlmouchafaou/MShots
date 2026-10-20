@@ -52,12 +52,18 @@ export function openTemplateId(id: string) {
   if (t) openTemplate(t);
 }
 
-export async function openCaptures(caps: CaptureInput[], kind: CaptureKind, label?: string, templateId?: string) {
-  if (!caps.length) return;
+/** Creates a project from captures (copied into the app's storage). */
+export async function projectFromCaptures(caps: CaptureInput[], kind: CaptureKind, label?: string, templateId?: string) {
   const stored = await Promise.all(caps.map(async (c) => ({ ...c, uri: await persistImage(c.uri) })));
   const t = templateId ? templateById(templateId) : undefined;
   const pages = t ? fillScenes(t.build(), stored, kind, label) : sceneFromCaptures(stored, kind, label);
-  const p = useProjects.getState().create(label ?? tr('project.untitled'), pages, kind);
+  return useProjects.getState().create(label ?? tr('project.untitled'), pages, kind);
+}
+
+/** Opens the editor on new captures (smart scene, or the given template). */
+export async function openCaptures(caps: CaptureInput[], kind: CaptureKind, label?: string, templateId?: string) {
+  if (!caps.length) return;
+  const p = await projectFromCaptures(caps, kind, label, templateId);
   router.push({ pathname: '/editor', params: { project: p.id } });
 }
 

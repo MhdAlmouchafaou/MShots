@@ -2,13 +2,19 @@ import { background, deviceLayer, linear, newScene, shadow, textLayer } from '..
 import { deviceById } from '../engine/devices';
 import type { DeviceLayer, Scene } from '../engine/types';
 
-export type CaptureInput = { uri: string; w?: number; h?: number };
+/** preset: viewport the capture was made at ('phone' | 'tablet' | 'desktop' | 'large' | 'custom'). */
+export type CaptureInput = { uri: string; w?: number; h?: number; label?: string | null; preset?: string };
 export type CaptureKind = 'web' | 'app' | 'image';
 
 /** Picks a device whose screen suits a capture's aspect ratio. */
 export function deviceFor(c: CaptureInput, kind: CaptureKind): { device: string; landscape: boolean; fit: DeviceLayer['screen']['fit'] } {
   const ar = c.w && c.h ? c.w / c.h : 0.46;
   if (kind === 'web') {
+    // Full-page captures are tall whatever the viewport: trust the viewport preset first.
+    if (c.preset === 'phone') return { device: 'iphone-17-pro', landscape: false, fit: 'top' };
+    if (c.preset === 'tablet') return { device: 'ipad-pro-11', landscape: false, fit: 'top' };
+    if (c.preset === 'desktop' || c.preset === 'custom') return { device: 'macbook-pro-14', landscape: false, fit: 'top' };
+    if (c.preset === 'large') return { device: 'browser-light', landscape: false, fit: 'top' };
     if (ar >= 0.9 || (c.w ?? 0) >= 900) return { device: 'browser-light', landscape: false, fit: 'top' };
     if (ar >= 0.6) return { device: 'ipad-pro-11', landscape: false, fit: 'top' };
     return { device: 'iphone-17-pro', landscape: false, fit: 'top' };
@@ -22,6 +28,9 @@ export function deviceFor(c: CaptureInput, kind: CaptureKind): { device: string;
 
 /** A tasteful scene built from 1–3 captures (more captures become extra pages). */
 export function sceneFromCaptures(caps: CaptureInput[], kind: CaptureKind, label?: string): Scene[] {
+  // Responsive set from the web capture (phone + tablet + desktop): one hero composition.
+  const presets = new Set(caps.map((c) => c.preset).filter(Boolean));
+  if (kind === 'web' && caps.length >= 2 && caps.length <= 4 && presets.size === caps.length) return [responsiveScene(caps, label)];
   const groups: CaptureInput[][] = [];
   const first = caps.slice(0, 3);
   const firstPick = first.map((c) => deviceFor(c, kind));
@@ -66,4 +75,36 @@ export function sceneFromCaptures(caps: CaptureInput[], kind: CaptureKind, label
     if (label && gi === 0) scene.layers.push(textLayer(scene, label, { y: scene.height * 0.09, size: scene.width * (wide ? 0.04 : 0.06), weight: 700 }));
     return scene;
   });
+}
+
+/** Laptop in the middle, tablet on the left, phone on the right (front, soft shadows). */
+function responsiveScene(caps: CaptureInput[], label?: string): Scene {
+  const scene = newScene('landscape', [], background({ fill: linear(['#EEE9E1', '#D8CFC2'], 170), grain: 0.12, vignette: 0.14 }));
+  scene.name = label ?? 'Responsive';
+  const order = ['large', 'desktop', 'custom', 'tablet', 'phone'];
+  const sorted = caps.slice().sort((a, b) => order.indexOf(a.preset ?? '') - order.indexOf(b.preset ?? ''));
+  const W = scene.width;
+  const H = scene.height;
+  const slots: Record<string, { x: number; y: number; size: number }> = {
+    big: { x: W * 0.5, y: H * 0.5, size: W * 0.56 },
+    tablet: { x: W * 0.2, y: H * 0.6, size: H * 0.56 },
+    phone: { x: W * 0.8, y: H * 0.64, size: H * 0.5 },
+  };
+  let usedBig = false;
+  for (const c of sorted) {
+    const p = deviceFor(c, 'web');
+    const slot = c.preset === 'tablet' ? slots.tablet : c.preset === 'phone' ? slots.phone : usedBig ? { x: W * 0.5, y: H * 0.3, size: W * 0.3 } : slots.big;
+    if (slot === slots.big) usedBig = true;
+    const layer = deviceLayer(scene, p.device, {
+      x: slot.x,
+      y: slot.y,
+      size: slot.size,
+      screen: { uri: c.uri, iw: c.w, ih: c.h, fit: 'top', scroll: 0, zoom: 1, bg: '#FFFFFF', statusBar: 'none', glare: 0.25, label },
+    });
+    layer.shadow = shadow({ blur: slot.size * 0.05, distance: slot.size * 0.03, opacity: 0.3 });
+    // The big device goes behind the small ones.
+    if (slot === slots.big) scene.layers.unshift(layer);
+    else scene.layers.push(layer);
+  }
+  return scene;
 }

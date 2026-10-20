@@ -161,13 +161,14 @@ half4 main(vec2 xy) {
   vec2 d = rot(q, -angle);
   float s = 0.004 + softness * 0.06;
   float L = 0.5;
-  if (kind < 1.5) { // window: four panes projected at an angle
-    vec2 w = d * vec2(1.0, 1.35) + vec2(0.18, 0.05);
-    w.x += w.y * 0.45;
-    vec2 g = abs(fract(w * 1.5 + 0.5) - 0.5);
-    float bars = smoothstep(0.03, 0.03 + s * 1.5, min(0.5 - g.x, 0.5 - g.y));
-    float frameMask = smoothstep(0.47 + s * 2.0, 0.47 - s * 2.0, max(abs(w.x), abs(w.y)) * 0.75);
-    L = bars * frameMask;
+  if (kind < 1.5) { // window: a 2x2 pane window projected as a skewed parallelogram
+    vec2 w = d + vec2(0.12, 0.06);
+    w.x += w.y * 0.55;
+    float sx = 0.30; float sy = 0.42;
+    float region = smoothstep(sx + s * 2.0, sx - s * 2.0, abs(w.x)) * smoothstep(sy + s * 2.0, sy - s * 2.0, abs(w.y));
+    float bar = 0.018;
+    float mull = smoothstep(bar - s, bar + s, abs(w.x)) * smoothstep(bar - s, bar + s, abs(w.y));
+    L = region * mull;
   } else if (kind < 2.5) { // blinds
     float st = abs(fract(d.y * 14.0) - 0.5) * 2.0;
     float slat = smoothstep(0.35 - s * 6.0, 0.35 + s * 6.0, st);

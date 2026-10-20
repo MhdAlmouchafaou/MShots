@@ -9,7 +9,7 @@ import { useTheme } from '../theme';
 /** Live-rendered (then cached) template preview. */
 export const TemplateThumb = memo(function TemplateThumb({ template, style, width }: { template: Template; style?: StyleProp<ViewStyle>; width?: number }) {
   const t = useTheme();
-  const uri = useThumb(`tpl-${template.id}`, template.build, { width });
+  const uri = useThumb(`tpl-${template.id}-${width ?? 420}`, template.build, { width });
   return (
     <View style={[styles.box, { backgroundColor: t.chip }, style]}>
       {uri ? <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={180} /> : null}

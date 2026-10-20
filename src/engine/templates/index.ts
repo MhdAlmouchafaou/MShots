@@ -15,8 +15,7 @@ export type Template = {
   featured?: boolean;
 };
 
-/** Filled by the template library (see ./library.ts). */
-export const TEMPLATES: Template[] = [];
+export { registerTemplates, templateById, TEMPLATES } from './registry';
 
 export const TEMPLATE_CATEGORIES: { id: TemplateCategory; label: string }[] = [
   { id: 'phone', label: 'Téléphones' },
@@ -32,8 +31,5 @@ export const TEMPLATE_CATEGORIES: { id: TemplateCategory; label: string }[] = [
   { id: 'tv', label: 'TV' },
 ];
 
-export function registerTemplates(list: Template[]) {
-  for (const t of list) if (!TEMPLATES.some((x) => x.id === t.id)) TEMPLATES.push(t);
-}
-
-export const templateById = (id: string) => TEMPLATES.find((t) => t.id === id);
+// Loads the built-in library (registers its templates).
+import './library';

@@ -1,4 +1,4 @@
-import { deviceById } from './devices';
+import { deviceById, drawnSize } from './devices';
 import type { Background, DeviceLayer, Fill, Format, ImageLayer, Layer, Scene, ScreenContent, Shadow, ShapeLayer, TextLayer } from './types';
 
 let n = 0;
@@ -48,8 +48,12 @@ export function background(o: Partial<Background> = {}): Background {
 /** A device layer centred in a scene, sized to fill `fill` of the scene height. */
 export function deviceLayer(scene: { width: number; height: number }, device: string, o: Partial<DeviceLayer> = {}): DeviceLayer {
   const spec = deviceById(device);
-  const big = spec.category === 'laptop' || spec.category === 'desktop' || spec.category === 'tv' || spec.category === 'browser';
-  const size = big ? scene.width * 0.82 : scene.height * 0.72;
+  // Fit inside the scene with a margin, whatever the device and scene shapes.
+  const ds = drawnSize(spec, !!o.landscape);
+  const maxW = scene.width * 0.8;
+  const maxH = scene.height * 0.74;
+  const k = Math.min(maxW / ds.w, maxH / ds.h);
+  const size = Math.max(ds.w, ds.h) * k;
   return {
     id: uid('d'),
     kind: 'device',
