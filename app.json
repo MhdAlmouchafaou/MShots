@@ -12,14 +12,18 @@
       "package": "com.mhdalmouchafaou.mshots",
       "versionCode": 1,
       "adaptiveIcon": {
-        "backgroundColor": "#E9E7E2",
+        "backgroundColor": "#FF5A1F",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "permissions": ["android.permission.INTERNET"],
-      "blockedPermissions": ["android.permission.RECORD_AUDIO"]
+      "permissions": [
+        "android.permission.INTERNET"
+      ],
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "plugins": [
       "expo-router",
@@ -31,7 +35,10 @@
           "image": "./assets/splash-icon.png",
           "imageWidth": 120,
           "backgroundColor": "#F3F1EC",
-          "dark": { "backgroundColor": "#0B0B0C", "image": "./assets/splash-icon-dark.png" }
+          "dark": {
+            "backgroundColor": "#0B0B0C",
+            "image": "./assets/splash-icon-dark.png"
+          }
         }
       ],
       [
@@ -39,19 +46,33 @@
         {
           "photosPermission": "MShots enregistre vos mockups dans la galerie et y lit vos captures.",
           "savePhotosPermission": "MShots enregistre vos mockups dans la galerie.",
-          "granularPermissions": ["photo"]
+          "granularPermissions": [
+            "photo"
+          ]
         }
       ],
       [
         "expo-image-picker",
-        { "photosPermission": "MShots importe vos captures d’écran depuis la galerie.", "cameraPermission": false, "microphonePermission": false }
+        {
+          "photosPermission": "MShots importe vos captures d’écran depuis la galerie.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
       ],
       [
         "expo-build-properties",
-        { "android": { "minSdkVersion": 26, "enableMinifyInReleaseBuilds": false, "useLegacyPackaging": true } }
+        {
+          "android": {
+            "minSdkVersion": 26,
+            "enableMinifyInReleaseBuilds": false,
+            "useLegacyPackaging": true
+          }
+        }
       ],
       "./plugins/withReleaseSigning"
     ],
-    "experiments": { "typedRoutes": false }
+    "experiments": {
+      "typedRoutes": false
+    }
   }
 }
