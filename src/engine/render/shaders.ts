@@ -60,7 +60,7 @@ float folds(vec2 p, float k) {
 
 float height(vec2 p, float kd) {
   if (kd < 0.5) return folds(p, 1.0);
-  if (kd < 1.5) return folds(p * 0.85, 1.25);
+  if (kd < 1.5) return folds(p * 0.8, 1.25);
   if (kd < 2.5) return folds(p * 1.2, 0.8) * 0.8;
   if (kd < 9.5 && kd > 8.5) return sin((p.y + fbm3(p * 0.7) * 1.8) * 9.0) * 0.08 + fbm3(p * 0.6) * 0.6;
   if (kd > 9.5 && kd < 10.5) return (1.0 - cell(p * 9.0)) * 0.12 + fbm3(p * 0.8) * 0.5;
@@ -80,15 +80,15 @@ half4 main(vec2 xy) {
     float h = height(p, kd);
     float hx = height(p + vec2(e, 0.0), kd);
     float hy = height(p + vec2(0.0, e), kd);
-    float amp = kd < 1.5 ? 14.0 : 9.0;
+    float amp = kd > 0.5 && kd < 1.5 ? 70.0 : 18.0;
     vec3 n = normalize(vec3((h - hx) * amp / (e * 40.0), (h - hy) * amp / (e * 40.0), 1.0));
     vec3 L = normalize(vec3(-0.55, -0.65, 0.75));
     float diff = clamp(dot(n, L), 0.0, 1.0);
     v = 0.18 + diff * 0.82;
     if (kd > 0.5 && kd < 1.5) {
       // velvet: fibres catch light at grazing angles (rim sheen) and deepen in the valleys
-      float rim = pow(1.0 - n.z, 1.4);
-      v = v * 0.75 + rim * 0.9;
+      float rim = pow(1.0 - n.z, 1.2);
+      v = 0.08 + diff * 0.62 + rim * 1.1;
       v = v * (0.92 + 0.08 * hash(px * 0.5));
     } else if (kd < 0.5) {
       // woven threads at pixel scale
@@ -165,18 +165,16 @@ half4 main(vec2 xy) {
     vec2 w = d * vec2(1.0, 1.35) + vec2(0.18, 0.05);
     w.x += w.y * 0.45;
     vec2 g = abs(fract(w * 1.5 + 0.5) - 0.5);
-    float inside = smoothstep(0.5 - 0.035 - s, 0.5 - 0.035 + s, 0.5 - max(g.x, g.y) + 0.5 - 0.5) ;
-    float pane = smoothstep(0.035 + s, 0.035 - s, max(0.0, 0.5 - max(g.x, g.y)) * 0.0 + 0.0) * 0.0;
     float bars = smoothstep(0.03, 0.03 + s * 1.5, min(0.5 - g.x, 0.5 - g.y));
-    float frameMask = smoothstep(0.62 + s * 2.0, 0.62 - s * 2.0, max(abs(w.x * 1.5), abs(w.y * 1.5)) * 0.75);
-    L = bars * frameMask + inside * 0.0 + pane;
+    float frameMask = smoothstep(0.47 + s * 2.0, 0.47 - s * 2.0, max(abs(w.x), abs(w.y)) * 0.75);
+    L = bars * frameMask;
   } else if (kind < 2.5) { // blinds
     float st = abs(fract(d.y * 14.0) - 0.5) * 2.0;
     float slat = smoothstep(0.35 - s * 6.0, 0.35 + s * 6.0, st);
     float mask = smoothstep(0.75, 0.35, abs(d.x + d.y * 0.4));
     L = slat * mask;
   } else if (kind < 3.5) { // leaves: dappled foliage shadow
-    vec2 p = d * 4.0 + vec2(3.1, 1.7);
+    vec2 p = d * 6.5 + vec2(3.1, 1.7);
     float n = fbm(p + vec2(fbm3(p * 0.7), fbm3(p * 0.7 + 4.0)) * 0.8);
     float spots = smoothstep(0.5 - s * 3.0, 0.5 + s * 3.0, n);
     L = mix(1.0, 0.0, spots * smoothstep(-0.7, 0.2, d.x));
@@ -194,8 +192,8 @@ half4 main(vec2 xy) {
     L = ray * smoothstep(1.5, 0.1, length(q - o));
   }
   // light (>0.5) and shadow (<0.5) around neutral grey
-  float g = 0.5 + (L - 0.5) * intensity;
-  g -= (1.0 - L) * shadeAmt * 0.18 * intensity;
+  float g = 0.5 + (L - 0.5) * intensity * 0.55;
+  g -= (1.0 - L) * shadeAmt * 0.12 * intensity;
   half3 c = half3(g);
   c = mix(c, c * tint.rgb * 1.6, half(clamp(L, 0.0, 1.0) * 0.25 * intensity));
   return half4(c, 1.0);

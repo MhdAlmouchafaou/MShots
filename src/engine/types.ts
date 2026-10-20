@@ -91,6 +91,8 @@ export type ScreenContent = {
   statusBar: 'none' | 'light' | 'dark';
   /** Glass reflection strength 0..1. */
   glare: number;
+  /** Text shown in the address bar of browser windows (website domain). */
+  label?: string;
 };
 
 type LayerBase = {

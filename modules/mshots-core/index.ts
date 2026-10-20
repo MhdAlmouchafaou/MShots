@@ -45,7 +45,10 @@ type MShotsCore = {
   /** Installs an APK (content:// or file://). 'permission' = the user must allow unknown sources first. */
   installApk(uri: string): Promise<'started' | 'permission'>;
   launchApp(pkg: string): boolean;
-  apkInfo(uri: string): Promise<{ pkg: string; label: string; version: string; icon: string | null } | null>;
+  apkInfo(uri: string): Promise<{ pkg: string; label: string; version: string; icon: string | null; installed: boolean } | null>;
+  /** Unknown-sources permission granted for MShots. */
+  canInstall(): boolean;
+  isInstalled(pkg: string): boolean;
   addListener(event: 'onCapture', cb: (e: Capture) => void): Sub;
   addListener(event: 'onBubble', cb: (e: { running: boolean }) => void): Sub;
   addListener(event: 'onInstall', cb: (e: { ok: boolean; pkg: string | null; message: string | null }) => void): Sub;

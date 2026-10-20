@@ -158,22 +158,34 @@ function Placeholder({ box, r, color }: { box: Box; r: number; color: string }) 
 }
 
 function StatusBar({ box, spec, k, color, island }: { box: Box; spec: DeviceSpec; k: number; color: string; island: boolean }) {
-  const h = (spec.family === 'ios' ? 5.6 : 4.4) * k;
-  const fs = h * 0.5;
+  const ios = spec.family === 'ios';
+  const h = (ios ? 6.2 : 4.6) * k;
+  const fs = h * (ios ? 0.42 : 0.5);
   const f = font(Math.max(4, fs));
-  const y = box.y + h * 0.62 + fs * 0.35 + (island ? 0.6 * k : 0);
-  const right = box.x + box.w - box.w * 0.08;
-  const u = fs * 0.22;
+  // Baseline: centred on the island when there is one.
+  const cy = island && spec.cutout.type === 'island' ? box.y + (spec.cutout.y + spec.cutout.h / 2) * k : box.y + h * 0.55;
+  const y = cy + fs * 0.36;
+  const margin = box.w * (ios ? 0.09 : 0.05);
+  const right = box.x + box.w - margin;
+  // battery
+  const bw = fs * 1.55;
+  const bh = fs * 0.72;
+  const bx = right - bw;
+  const by = cy - bh / 2;
+  // signal bars
+  const barW = fs * 0.17;
+  const gap = fs * 0.1;
+  const sx = bx - fs * 0.55 - 4 * barW - 3 * gap;
   return (
     <Group>
-      <Text x={box.x + box.w * (spec.family === 'ios' ? 0.12 : 0.06)} y={y} text="9:41" font={f} color={color} />
-      {/* signal */}
-      {[0, 1, 2, 3].map((i) => (
-        <RoundedRect key={i} x={right - 9.2 * u * 2.2 + i * 1.6 * u} y={y - (1.2 + i * 0.8) * u * 2} width={1.1 * u} height={(1.2 + i * 0.8) * u * 2} r={0.3 * u} color={color} />
-      ))}
-      {/* battery */}
-      <RoundedRect x={right - 5.2 * u * 2} y={y - 2.6 * u * 2} width={4.6 * u * 2} height={2.4 * u * 2} r={0.7 * u * 2} color={alpha(color, 0.35)} />
-      <RoundedRect x={right - 5.0 * u * 2} y={y - 2.4 * u * 2} width={3.4 * u * 2} height={2.0 * u * 2} r={0.5 * u * 2} color={color} />
+      <Text x={box.x + (ios ? box.w * 0.13 : margin)} y={y} text="9:41" font={f} color={color} />
+      {[0, 1, 2, 3].map((i) => {
+        const hh = bh * (0.4 + i * 0.2);
+        return <RoundedRect key={i} x={sx + i * (barW + gap)} y={cy + bh / 2 - hh} width={barW} height={hh} r={barW * 0.35} color={color} />;
+      })}
+      <RoundedRect x={bx} y={by} width={bw} height={bh} r={bh * 0.3} color={alpha(color, 0.38)} />
+      <RoundedRect x={bx + bh * 0.12} y={by + bh * 0.12} width={(bw - bh * 0.24) * 0.78} height={bh * 0.76} r={bh * 0.22} color={color} />
+      <RoundedRect x={bx + bw + fs * 0.05} y={cy - bh * 0.18} width={fs * 0.08} height={bh * 0.36} r={fs * 0.04} color={alpha(color, 0.5)} />
     </Group>
   );
 }
@@ -387,6 +399,10 @@ export const DeviceFrame = memo(function DeviceFrame({ layer, image }: { layer: 
           <Path path={path} style="stroke" strokeWidth={spec.frame * k * 1.6}>
             {metal(body, fin, frameColor)}
           </Path>
+          {/* soft satin sheen of the back glass */}
+          <Path path={path}>
+            <LinearGradient start={vec(body.x, body.y)} end={vec(body.x + body.w, body.y + body.h * 0.6)} colors={['rgba(255,255,255,0.16)', 'rgba(255,255,255,0.02)', 'rgba(255,255,255,0)', 'rgba(0,0,0,0.06)']} positions={[0, 0.35, 0.6, 1]} />
+          </Path>
           {layer.details ? <CameraModule spec={spec} body={body} k={k} fin={fin} rotate={rotate} /> : null}
         </Group>
       );
@@ -445,6 +461,17 @@ function Handheld({ layer, g, fin, frameColor, image, path }: { layer: DeviceLay
       <ScreenView box={screen} r={screen.r} content={layer.screen} image={image} spec={spec} k={k} />
       <Cutout spec={spec} screen={screen} k={k} rotate={rotate} />
       <BezelDot spec={spec} body={body} screen={screen} k={k} rotate={rotate} />
+      {spec.homeButton ? (() => {
+        const r = spec.bezel.bottom * k * 0.3;
+        const cx = rotate ? screen.x + screen.w + (body.x + body.w - screen.x - screen.w) / 2 : body.x + body.w / 2;
+        const cy = rotate ? body.y + body.h / 2 : screen.y + screen.h + (body.y + body.h - screen.y - screen.h) / 2;
+        return (
+          <Group>
+            <Circle cx={cx} cy={cy} r={r} color="#0c0c0d" />
+            <Circle cx={cx} cy={cy} r={r} style="stroke" strokeWidth={0.35 * k} color={alpha(fin.edge, 0.5)} />
+          </Group>
+        );
+      })() : null}
       {spec.crease ? (
         rotate ? (
           <Rect x={screen.x} y={screen.y + screen.h / 2 - 0.6 * k} width={screen.w} height={1.2 * k}>
@@ -629,7 +656,7 @@ function Browser({ layer, g, fin, image }: { layer: DeviceLayer; g: Geo; fin: Fi
     return p.build();
   }, [body.x, body.y, body.w, body.h, r]);
   const f = font(Math.max(5, bar * 0.28), '500');
-  const url = 'mshots.app';
+  const url = (layer.screen.label || 'mshots.app').replace(/^https?:\/\//, '').replace(/\/$/, '');
   const pillW = body.w * (style === 'chrome' ? 0.62 : 0.4);
   return (
     <Group clip={clip}>
